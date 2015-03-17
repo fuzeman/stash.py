@@ -21,6 +21,10 @@ class Module(object):
     def __init__(self):
         self.stash = None
 
+    @property
+    def hash_key(self):
+        return self.stash.hash_key
+
 
 class MappingMeta(ModuleMeta, ABCMeta):
     pass

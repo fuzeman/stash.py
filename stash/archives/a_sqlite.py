@@ -38,6 +38,8 @@ class SqliteArchive(Archive):
         return rows[0]
 
     def __delitem__(self, key):
+        key = self.hash_key(key)
+
         with closing(self.db.cursor()) as c:
             result = c.execute('delete from "%s" where key=?' % self.table, key)
 
@@ -49,6 +51,8 @@ class SqliteArchive(Archive):
             raise KeyError(key)
 
     def __getitem__(self, key):
+        key = self.hash_key(key)
+
         row = self.select_one('select value from "%s" where key=?' % self.table, (key, ))
 
         if not row:
@@ -68,6 +72,7 @@ class SqliteArchive(Archive):
         return row[0]
 
     def __setitem__(self, key, value):
+        key = self.hash_key(key)
         value = self.dumps(value)
 
         with closing(self.db.cursor()) as c:
