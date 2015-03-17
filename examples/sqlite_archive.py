@@ -5,7 +5,7 @@ from stash import Stash
 
 
 if __name__ == '__main__':
-    s = Stash('sqlite:///basic.db?table=stash', 'lru:///?capacity=5')
+    s = Stash('sqlite:///sqlite_archive.db?table=stash', 'lru:///?capacity=5')
 
     for x in xrange(5):
         s[str(x)] = x
