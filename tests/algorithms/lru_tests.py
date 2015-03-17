@@ -2,19 +2,19 @@ from stash import Stash, LruAlgorithm, MemoryArchive, MemoryCache
 
 
 def test_construct():
-    st = Stash(MemoryArchive(), LruAlgorithm, MemoryCache())
+    st = Stash(MemoryArchive(), LruAlgorithm)
     assert type(st.algorithm) is LruAlgorithm
 
-    st = Stash(MemoryArchive(), 'lru:///', MemoryCache())
+    st = Stash(MemoryArchive(), 'lru:///')
     assert type(st.algorithm) is LruAlgorithm
 
-    st = Stash(MemoryArchive(), 'lru:///?capacity=64', MemoryCache())
+    st = Stash(MemoryArchive(), 'lru:///?capacity=64')
     assert type(st.algorithm) is LruAlgorithm
     assert st.algorithm.capacity == 64
 
 
 def test_set():
-    st = Stash(MemoryArchive(), LruAlgorithm(10), MemoryCache())
+    st = Stash(MemoryArchive(), LruAlgorithm(10))
 
     # Fill with numbers: 1 - 10
     for x in xrange(1, 11):
@@ -27,7 +27,7 @@ def test_set():
 
 
 def test_get():
-    st = Stash(MemoryArchive({3: '3', 4: '4'}), LruAlgorithm(10), MemoryCache({1: '1', 2: '2'}))
+    st = Stash(MemoryArchive({3: '3', 4: '4'}), LruAlgorithm(10), cache=MemoryCache({1: '1', 2: '2'}))
 
     # Ensure numbers 1 - 4 exist
     for x in xrange(1, 5):
@@ -35,7 +35,7 @@ def test_get():
 
 
 def test_touch():
-    st = Stash(MemoryArchive(), LruAlgorithm(10), MemoryCache())
+    st = Stash(MemoryArchive(), LruAlgorithm(10))
 
     # Fill with numbers: 1 - 10
     for x in xrange(1, 11):
@@ -52,7 +52,7 @@ def test_touch():
 
 
 def test_archive():
-    st = Stash(MemoryArchive(), LruAlgorithm(10), MemoryCache())
+    st = Stash(MemoryArchive(), LruAlgorithm(10))
 
     # Fill with numbers: 1 - 10
     for x in xrange(1, 11):
