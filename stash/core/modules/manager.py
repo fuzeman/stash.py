@@ -9,14 +9,17 @@ class ModuleManager(object):
     modules = {}
 
     @classmethod
-    def construct(cls, group, value):
+    def construct(cls, stash, group, value):
         if isinstance(value, (str, unicode)):
-            return cls.from_uri(group, value)
+            obj = cls.from_uri(group, value)
+        elif inspect.isclass(value):
+            obj = value()
+        else:
+            obj = value
 
-        if inspect.isclass(value):
-            return value()
+        obj.stash = stash
 
-        return value
+        return obj
 
     @classmethod
     def from_uri(cls, group, uri):

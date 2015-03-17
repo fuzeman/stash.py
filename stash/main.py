@@ -4,13 +4,12 @@ from collections import MutableMapping
 
 
 class Stash(MutableMapping):
-    def __init__(self, archive, algorithm='lru:///', cache='memory:///'):
-        self.archive = ModuleManager.construct('archive', archive)
-
-        self.algorithm = ModuleManager.construct('algorithm', algorithm)
-        self.algorithm.stash = self
-
-        self.cache = ModuleManager.construct('cache', cache)
+    def __init__(self, archive, algorithm='lru:///', serializer='none:///', cache='memory:///'):
+        # Construct modules
+        self.archive = ModuleManager.construct(self, 'archive', archive)
+        self.algorithm = ModuleManager.construct(self, 'algorithm', algorithm)
+        self.serializer = ModuleManager.construct(self, 'serializer', serializer)
+        self.cache = ModuleManager.construct(self, 'cache', cache)
 
     def flush(self):
         # Update `archive` with the items in `cache`

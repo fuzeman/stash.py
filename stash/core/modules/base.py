@@ -18,6 +18,9 @@ class Module(object):
     __group__ = None
     __key__ = None
 
+    def __init__(self):
+        self.stash = None
+
 
 class MappingMeta(ModuleMeta, ABCMeta):
     pass

@@ -4,17 +4,6 @@ from stash.core.modules.base import Module
 class Algorithm(Module):
     __group__ = 'algorithm'
 
-    def __init__(self):
-        self._stash = None
-
-    @property
-    def stash(self):
-        return self._stash
-
-    @stash.setter
-    def stash(self, value):
-        self._stash = value
-
     @property
     def archive(self):
         return self.stash.archive
