@@ -1,13 +1,20 @@
+import logging
+logging.basicConfig(level=logging.DEBUG)
+
 from stash import Stash, LruAlgorithm, SqliteArchive, MemoryCache
 
+
 if __name__ == '__main__':
-    s = Stash(LruAlgorithm(), SqliteArchive('basic.db', 'stash'), MemoryCache())
+    s = Stash(LruAlgorithm(5), SqliteArchive('basic.db', 'stash'), MemoryCache())
 
-    if '1' not in s:
-        print "s['1'] = 1"
-        s['1'] = 1
+    for x in xrange(5):
+        s[str(x)] = x
 
-    print "s['1'] = %r" % s['1']
+    for x in xrange(2):
+        s[str(x)] = x
+
+    for x in xrange(10, 13):
+        s[str(x)] = x
 
     s.flush()
 
