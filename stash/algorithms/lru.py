@@ -69,8 +69,6 @@ class LruAlgorithm(Algorithm):
         # Remove from `nodes`
         del self.nodes[key]
 
-        log.debug('release(%r)', key)
-
     def create(self, key):
         if key in self.nodes:
             # Move node to the front of `queue`
@@ -86,8 +84,6 @@ class LruAlgorithm(Algorithm):
         # Load `key` from `archive`
         self[key] = self.archive[key]
 
-        log.debug('load(%r)', key)
-
         return self.cache[key]
 
     def touch(self, key):
@@ -98,5 +94,3 @@ class LruAlgorithm(Algorithm):
 
         # Append `node` to the start of `queue`
         self.nodes[key] = self.queue.appendleft(node)
-
-        log.debug('touch(%r)', key)
