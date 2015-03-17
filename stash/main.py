@@ -1,13 +1,16 @@
+from stash.core.modules.manager import ModuleManager
+
 from collections import MutableMapping
 
 
 class Stash(MutableMapping):
-    def __init__(self, algorithm, archive, cache):
-        self.algorithm = algorithm
+    def __init__(self, archive, algorithm='lru:///', cache='memory:///'):
+        self.archive = ModuleManager.construct('archive', archive)
+
+        self.algorithm = ModuleManager.construct('algorithm', algorithm)
         self.algorithm.stash = self
 
-        self.archive = archive
-        self.cache = cache
+        self.cache = ModuleManager.construct('cache', cache)
 
     def flush(self):
         # Update `archive` with the items in `cache`

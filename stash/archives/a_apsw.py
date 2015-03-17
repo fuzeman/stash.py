@@ -2,4 +2,4 @@ from stash.archives.core.base import Archive
 
 
 class ApswArchive(Archive):
-    pass
+    __key__ = 'apsw'

@@ -1,4 +1,9 @@
-class Algorithm(object):
+from stash.core.modules.base import Module
+
+
+class Algorithm(Module):
+    __group__ = 'algorithm'
+
     def __init__(self):
         self._stash = None
 

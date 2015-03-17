@@ -1,4 +1,5 @@
 from stash.algorithms.core.base import Algorithm
+from stash.core.helpers import to_integer
 
 from llist import dllist
 import logging
@@ -7,10 +8,12 @@ log = logging.getLogger(__name__)
 
 
 class LruAlgorithm(Algorithm):
+    __key__ = 'lru'
+
     def __init__(self, capacity=100):
         super(LruAlgorithm, self).__init__()
 
-        self.capacity = capacity
+        self.capacity = to_integer(capacity)
 
         self.queue = dllist()
         self.nodes = {}

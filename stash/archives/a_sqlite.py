@@ -5,6 +5,8 @@ import sqlite3
 
 
 class SqliteArchive(Archive):
+    __key__  = 'sqlite'
+
     def __init__(self, db, table):
         self.db = sqlite3.connect(db) if type(db) is str else db
         self.table = table

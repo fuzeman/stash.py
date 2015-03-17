@@ -2,6 +2,8 @@ from stash.caches.core.base import Cache
 
 
 class MemoryCache(Cache):
+    __key__ = 'memory'
+
     def __init__(self, initial=None):
         self.data = initial or {}
 

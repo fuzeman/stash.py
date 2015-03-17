@@ -1,7 +1,9 @@
-from collections import MutableMapping
+from stash.core.modules.base import MappingModule
 
 
-class Cache(MutableMapping):
+class Cache(MappingModule):
+    __group__ = 'cache'
+
     def __delitem__(self, key):
         raise NotImplementedError
 

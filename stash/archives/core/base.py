@@ -1,7 +1,9 @@
-from collections import MutableMapping
+from stash.core.modules.base import MappingModule
 
 
-class Archive(MutableMapping):
+class Archive(MappingModule):
+    __group__ = 'archive'
+
     def save(self):
         raise NotImplementedError
 

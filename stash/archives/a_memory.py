@@ -2,6 +2,8 @@ from stash.archives.core.base import Archive
 
 
 class MemoryArchive(Archive):
+    __key__ = 'memory'
+
     def __init__(self, initial=None):
         self.data = initial or {}
 
