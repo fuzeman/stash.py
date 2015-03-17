@@ -1,9 +1,12 @@
-from stash.caches.core.base import Cache
+from stash.archives.core.base import Archive
 
 
-class MemoryCache(Cache):
+class MemoryArchive(Archive):
     def __init__(self, initial=None):
         self.data = initial or {}
+
+    def save(self):
+        pass
 
     def __delitem__(self, key):
         del self.data[key]

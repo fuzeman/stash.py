@@ -32,8 +32,8 @@ class LruAlgorithm(Algorithm):
             # Try retrieve value from `cache`
             value = self.cache[key]
 
-            # Move node to the front of `queue`
-            self.touch(key)
+            # Create node for `key`
+            self.create(key)
 
             return value
         except KeyError:
@@ -41,18 +41,11 @@ class LruAlgorithm(Algorithm):
             return self.load(key)
 
     def __setitem__(self, key, value):
-        if key in self.nodes:
-            # Move node to the front of `queue`
-            self.touch(key)
-        else:
-            # Store node in `queue`
-            self.nodes[key] = self.queue.appendleft(key)
-
         # Store `value` in cache
         self.cache[key] = value
 
-        # Compact `cache`
-        self.compact()
+        # Create node for `key`
+        self.create(key)
 
     def compact(self):
         count = len(self.nodes)
@@ -75,8 +68,19 @@ class LruAlgorithm(Algorithm):
 
         log.debug('release(%r)', key)
 
+    def create(self, key):
+        if key in self.nodes:
+            # Move node to the front of `queue`
+            self.touch(key)
+        else:
+            # Store node in `queue`
+            self.nodes[key] = self.queue.appendleft(key)
+
+        # Compact `cache`
+        self.compact()
+
     def load(self, key):
-        # Try load `key` from `archive`
+        # Load `key` from `archive`
         self[key] = self.archive[key]
 
         log.debug('load(%r)', key)
