@@ -1,11 +1,11 @@
 import logging
 logging.basicConfig(level=logging.DEBUG)
 
-from stash import Stash, LruAlgorithm, SqliteArchive, MemoryCache
+from stash import Stash
 
 
 if __name__ == '__main__':
-    s = Stash(LruAlgorithm(5), SqliteArchive('basic.db', 'stash'), MemoryCache())
+    s = Stash('sqlite:///basic.db?table=stash', 'lru:///?capacity=5')
 
     for x in xrange(5):
         s[str(x)] = x
