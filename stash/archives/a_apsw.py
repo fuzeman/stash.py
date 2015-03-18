@@ -17,6 +17,9 @@ class ApswArchive(Archive):
         with closing(self.db.cursor()) as c:
             c.execute('create table if not exists "%s" (key PRIMARY KEY, value)' % self.table)
 
+    def save(self):
+        pass
+
     def select(self, sql, parameters=None):
         if parameters is None:
             parameters = ()
@@ -36,7 +39,7 @@ class ApswArchive(Archive):
         key = self.hash_key(key)
 
         with closing(self.db.cursor()) as c:
-            result = c.execute('delete from "%s" where key=?' % self.table, key)
+            result = c.execute('delete from "%s" where key=?' % self.table, (key, ))
             rows = list(result)
 
             success = len(rows) > 0

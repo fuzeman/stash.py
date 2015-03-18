@@ -41,7 +41,7 @@ class SqliteArchive(Archive):
         key = self.hash_key(key)
 
         with closing(self.db.cursor()) as c:
-            result = c.execute('delete from "%s" where key=?' % self.table, key)
+            result = c.execute('delete from "%s" where key=?' % self.table, (key, ))
 
             success = result.rowcount > 0
 
