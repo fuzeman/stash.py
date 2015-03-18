@@ -34,6 +34,26 @@ def test_get():
         assert st[x] == str(x)
 
 
+def test_delete():
+    st = Stash(MemoryArchive({3: '3', 4: '4'}), LruAlgorithm(10), cache=MemoryCache({1: '1', 2: '2'}))
+
+    # Test archive deletion
+    del st[3]
+    assert st.get(3) is None
+
+    # Test cache deletion
+    del st[1]
+    assert st.get(1) is None
+
+    # Test deletion of LRU nodes
+    assert st[2] == '2'  # Construct LRU nodes
+
+    del st[2]
+    assert st.get(2) is None
+
+    assert 2 not in st.algorithm.nodes
+
+
 def test_touch():
     st = Stash(MemoryArchive(), LruAlgorithm(10))
 
