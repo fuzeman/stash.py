@@ -5,6 +5,8 @@ class MemoryCache(Cache):
     __key__ = 'memory'
 
     def __init__(self, initial=None):
+        super(MemoryCache, self).__init__()
+
         self.data = initial or {}
 
     def __delitem__(self, key):
