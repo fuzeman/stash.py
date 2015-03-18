@@ -10,5 +10,5 @@ __all__ = [
     'LruAlgorithm',
     'ApswArchive', 'MemoryArchive', 'SqliteArchive',
     'MemoryCache',
-    'NoneSerializer', 'PickleSerializer'
+    'JsonPickleSerializer', 'NoneSerializer', 'PickleSerializer'
 ]
