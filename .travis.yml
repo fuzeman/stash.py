@@ -5,6 +5,7 @@ python:
   - "2.7"
   - "3.2"
   - "3.3"
+  - "3.4"
 
 install:
   - mkdir .install; pushd .install; git clone https://github.com/rogerbinns/apsw.git apsw; pushd apsw; python setup.py fetch --all build --enable-all-extensions install; popd; popd;
