@@ -2,7 +2,11 @@ from stash.algorithms.core.base import Algorithm
 from stash.core.helpers import to_integer
 from stash.lib.six.moves import xrange
 
-from llist import dllist
+try:
+    from llist import dllist
+except ImportError:
+    from pyllist import dllist
+
 import logging
 
 log = logging.getLogger(__name__)
