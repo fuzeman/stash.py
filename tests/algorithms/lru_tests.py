@@ -21,9 +21,9 @@ def test_set():
     for x in xrange(1, 11):
         st[x] = str(x)
 
-    assert list(st.cache) == [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+    assert sorted(st.cache) == [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
 
-    assert list(st.algorithm.nodes) == [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+    assert sorted(st.algorithm.nodes) == [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
     assert list(st.algorithm.queue) == [10, 9, 8, 7, 6, 5, 4, 3, 2, 1]
 
 
@@ -66,9 +66,9 @@ def test_touch():
     for x in xrange(1, 6):
         st[x] = str(x)
 
-    assert list(st.cache) == [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+    assert sorted(st.cache) == [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
 
-    assert list(st.algorithm.nodes) == [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+    assert sorted(st.algorithm.nodes) == [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
     assert list(st.algorithm.queue) == [5, 4, 3, 2, 1, 10, 9, 8, 7, 6]
 
 
@@ -87,8 +87,8 @@ def test_archive():
     for x in xrange(21, 26):
         st[x] = str(x)
 
-    assert list(st.archive) == [8, 9, 10, 6, 7]
-    assert list(st.cache) == [1, 2, 3, 4, 5, 21, 22, 23, 24, 25]
+    assert sorted(st.archive) == [6, 7, 8, 9, 10]
+    assert sorted(st.cache) == [1, 2, 3, 4, 5, 21, 22, 23, 24, 25]
 
-    assert list(st.algorithm.nodes) == [1, 2, 3, 4, 5, 21, 22, 23, 24, 25]
+    assert sorted(st.algorithm.nodes) == [1, 2, 3, 4, 5, 21, 22, 23, 24, 25]
     assert list(st.algorithm.queue) == [25, 24, 23, 22, 21, 5, 4, 3, 2, 1]
