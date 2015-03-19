@@ -1,5 +1,7 @@
-import pytest
 from stash import Stash, SqliteArchive
+from stash.lib.six.moves import xrange
+
+import pytest
 
 
 def fetch(cursor, query):

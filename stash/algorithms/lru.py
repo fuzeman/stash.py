@@ -1,5 +1,6 @@
 from stash.algorithms.core.base import Algorithm
 from stash.core.helpers import to_integer
+from stash.lib.six.moves import xrange
 
 from llist import dllist
 import logging

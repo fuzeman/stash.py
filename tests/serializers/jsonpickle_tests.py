@@ -1,7 +1,7 @@
 from stash import JsonPickleSerializer
 
 
-def test_dumps():
+def test_basic():
     serializer = JsonPickleSerializer()
 
     assert serializer.dumps(1234) == '1234'

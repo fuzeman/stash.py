@@ -1,4 +1,5 @@
 from stash import Stash, LruAlgorithm, MemoryArchive, MemoryCache
+from stash.lib.six.moves import xrange
 
 
 def test_construct():

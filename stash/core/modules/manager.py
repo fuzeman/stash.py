@@ -1,4 +1,6 @@
-from urlparse import urlparse, parse_qsl
+from stash.lib import six
+from stash.lib.six.moves.urllib import parse as urlparse
+
 import inspect
 import logging
 
@@ -10,12 +12,15 @@ class ModuleManager(object):
 
     @classmethod
     def construct(cls, stash, group, value):
-        if isinstance(value, (str, unicode)):
+        if isinstance(value, six.string_types):
             obj = cls.from_uri(group, value)
         elif inspect.isclass(value):
             obj = value()
         else:
             obj = value
+
+        if obj is None:
+            return None
 
         obj.stash = stash
 
@@ -26,7 +31,17 @@ class ModuleManager(object):
         if group not in cls.modules:
             return None
 
-        result = urlparse(uri)
+        # Retrieve scheme from URI
+        scheme = cls.get_scheme(uri)
+
+        if not scheme:
+            return None
+
+        # Ensure scheme is registered
+        cls.register_scheme(scheme)
+
+        # Parse URI
+        result = urlparse.urlparse(uri)
         key = result.scheme
 
         if key not in cls.modules[group]:
@@ -43,10 +58,19 @@ class ModuleManager(object):
             args.append(result.path.lstrip('/'))
 
         # Parse `query`
-        kwargs = dict(parse_qsl(result.query))
+        kwargs = dict(urlparse.parse_qsl(result.query))
 
         # Construct module
         return module(*args, **kwargs)
+
+    @classmethod
+    def get_scheme(cls, uri):
+        pos = uri.find('://')
+
+        if pos < 0:
+            return None
+
+        return uri[:pos]
 
     @classmethod
     def register(cls, module):
@@ -65,3 +89,13 @@ class ModuleManager(object):
             return
 
         cls.modules[group][key] = module
+
+    @classmethod
+    def register_scheme(cls, scheme):
+        for method in filter(lambda s: s.startswith('uses_'), dir(urlparse)):
+            schemes = getattr(urlparse, method)
+
+            if scheme in schemes:
+                continue
+
+            schemes.append(scheme)

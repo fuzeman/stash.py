@@ -2,6 +2,7 @@ import logging
 logging.basicConfig(level=logging.DEBUG)
 
 from stash import Stash
+from stash.lib.six.moves import xrange
 
 
 if __name__ == '__main__':
