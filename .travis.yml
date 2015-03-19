@@ -9,7 +9,7 @@ python:
 
 env:
   - LLIST=llist
-  - LLIST=pyllist
+  - LLIST=git+https://github.com/fuzeman/pypy-llist.git
 
 install:
   - mkdir .install; pushd .install; git clone https://github.com/rogerbinns/apsw.git apsw; pushd apsw; python setup.py fetch --all build --enable-all-extensions install; popd; popd;
