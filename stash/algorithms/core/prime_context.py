@@ -2,7 +2,7 @@ import thread
 
 
 class PrimeContext(object):
-    def __init__(self, algorithm, buffer=None):
+    def __init__(self, algorithm=None, buffer=None):
         self._algorithm = algorithm
         self._buffer = buffer
 
@@ -11,9 +11,15 @@ class PrimeContext(object):
         return self._buffer
 
     def __enter__(self):
+        if self._algorithm is None:
+            return
+
         self._algorithm._buffers[thread.get_ident()] = self._buffer
 
     def __exit__(self, exc_type, exc_val, exc_tb):
+        if self._algorithm is None:
+            return
+
         try:
             del self._algorithm._buffers[thread.get_ident()]
         except KeyError:
