@@ -12,6 +12,12 @@ class Algorithm(Module):
     def cache(self):
         return self.stash.cache
 
+    def compact(self, force=False):
+        raise NotImplementedError
+
+    def prime(self, keys=None, force=False):
+        raise NotImplementedError
+
     def __delitem__(self, key):
         success = False
 

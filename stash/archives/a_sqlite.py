@@ -19,6 +19,15 @@ class SqliteArchive(Archive):
 
         self.db.commit()
 
+    def iterkeys(self):
+        rows = self.select('select key from "%s"' % self.table)
+
+        for row in rows:
+            yield self.key_decode(row[0])
+
+    def keys(self):
+        return list(self.iterkeys())
+
     def save(self):
         pass
 
@@ -38,7 +47,7 @@ class SqliteArchive(Archive):
         return rows[0]
 
     def __delitem__(self, key):
-        key = self.hash_key(key)
+        key = self.key_encode(key)
 
         with closing(self.db.cursor()) as c:
             result = c.execute('delete from "%s" where key=?' % self.table, (key, ))
@@ -51,7 +60,7 @@ class SqliteArchive(Archive):
             raise KeyError(key)
 
     def __getitem__(self, key):
-        key = self.hash_key(key)
+        key = self.key_encode(key)
 
         row = self.select_one('select value from "%s" where key=?' % self.table, (key, ))
 
@@ -72,7 +81,7 @@ class SqliteArchive(Archive):
         return row[0]
 
     def __setitem__(self, key, value):
-        key = self.hash_key(key)
+        key = self.key_encode(key)
         value = self.dumps(value)
 
         with closing(self.db.cursor()) as c:

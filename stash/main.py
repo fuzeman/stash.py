@@ -4,14 +4,14 @@ from collections import MutableMapping
 
 
 class Stash(MutableMapping):
-    def __init__(self, archive, algorithm='lru:///', serializer='none:///', cache='memory:///', hash_key=None):
+    def __init__(self, archive, algorithm='lru:///', serializer='none:///', cache='memory:///', key_transform=None):
         # Construct modules
         self.archive = ModuleManager.construct(self, 'archive', archive)
         self.algorithm = ModuleManager.construct(self, 'algorithm', algorithm)
         self.serializer = ModuleManager.construct(self, 'serializer', serializer)
         self.cache = ModuleManager.construct(self, 'cache', cache)
 
-        self.hash_key = hash_key or (lambda key: key)
+        self.key_transform = key_transform or (lambda key: key, lambda key: key)
 
     def flush(self):
         # Update `archive` with the items in `cache`
@@ -24,6 +24,24 @@ class Stash(MutableMapping):
         # Ensure `archive` is completely saved
         self.archive.save()
 
+    def compact(self):
+        return self.algorithm.compact()
+
+    def prime(self, keys=None, force=False):
+        """Prime cache with `keys` from archive.
+
+        :param keys: list of keys to load, or `None` to load everything
+        :type keys: list of any or None
+
+        :param force: force the loading of items (by ignoring the algorithm capacity parameter).
+                      **Note:** these items will be removed on the next `compact()` call.
+        :type force: bool
+        """
+        return self.algorithm.prime(
+            keys=keys,
+            force=force
+        )
+
     def __delitem__(self, key):
         del self.algorithm[key]
 
@@ -34,7 +52,9 @@ class Stash(MutableMapping):
         raise NotImplementedError
 
     def __len__(self):
-        raise NotImplementedError
+        self.flush()
+
+        return len(self.archive)
 
     def __setitem__(self, key, value):
         self.algorithm[key] = value

@@ -21,8 +21,16 @@ class Module(six.with_metaclass(ModuleMeta)):
         self.stash = None
 
     @property
-    def hash_key(self):
-        return self.stash.hash_key
+    def key_encode(self):
+        encode, _ = self.stash.key_transform
+
+        return encode
+
+    @property
+    def key_decode(self):
+        _, decode = self.stash.key_transform
+
+        return decode
 
 
 class MappingMeta(ModuleMeta, ABCMeta):

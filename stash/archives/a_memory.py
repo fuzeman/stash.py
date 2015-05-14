@@ -13,12 +13,12 @@ class MemoryArchive(Archive):
         pass
 
     def __delitem__(self, key):
-        key = self.hash_key(key)
+        key = self.key_encode(key)
 
         del self.data[key]
 
     def __getitem__(self, key):
-        key = self.hash_key(key)
+        key = self.key_encode(key)
 
         return self.data[key]
 
@@ -29,6 +29,6 @@ class MemoryArchive(Archive):
         return len(self.data)
 
     def __setitem__(self, key, value):
-        key = self.hash_key(key)
+        key = self.key_encode(key)
 
         self.data[key] = value

@@ -1,4 +1,5 @@
 from stash.algorithms.core.base import Algorithm
+from stash.algorithms.core.prime_context import PrimeContext
 from stash.core.helpers import to_integer
 from stash.lib.six.moves import xrange
 
@@ -8,6 +9,7 @@ except ImportError:
     from pyllist import dllist
 
 import logging
+import thread
 
 log = logging.getLogger(__name__)
 
@@ -15,13 +17,18 @@ log = logging.getLogger(__name__)
 class LruAlgorithm(Algorithm):
     __key__ = 'lru'
 
-    def __init__(self, capacity=100):
+    def __init__(self, capacity=100, compact='auto', compact_threshold=200):
         super(LruAlgorithm, self).__init__()
 
-        self.capacity = to_integer(capacity)
+        self.capacity = to_integer(capacity, 100)
+
+        self.compact_mode = compact
+        self.compact_threshold = to_integer(compact_threshold, 200)
 
         self.queue = dllist()
         self.nodes = {}
+
+        self._buffers = {}
 
     def __delitem__(self, key):
         try:
@@ -36,17 +43,28 @@ class LruAlgorithm(Algorithm):
         return super(LruAlgorithm, self).__delitem__(key)
 
     def __getitem__(self, key):
+        # Try retrieve value from `prime_buffer`
         try:
-            # Try retrieve value from `cache`
+            buffer = self._buffers.get(thread.get_ident())
+
+            if buffer is not None:
+                return buffer[key]
+        except KeyError:
+            pass
+
+        # Try retrieve value from `cache`
+        try:
             value = self.cache[key]
 
-            # Create node for `key`
+            # Ensure node for `key` exists
             self.create(key)
 
             return value
         except KeyError:
-            # Try load `key` from `archive`
-            return self.load(key)
+            pass
+
+        # Try load `key` from `archive`
+        return self.load(key)
 
     def __setitem__(self, key, value):
         # Store `value` in cache
@@ -55,14 +73,16 @@ class LruAlgorithm(Algorithm):
         # Create node for `key`
         self.create(key)
 
-    def compact(self):
+    def compact(self, force=False):
         count = len(self.nodes)
 
         if count <= self.capacity:
             return
 
-        for x in xrange(count - self.capacity):
-            self.release()
+        if not force and count <= self.compact_threshold:
+            return
+
+        self.release_items(count - self.capacity)
 
     def release(self, key=None):
         if key is None:
@@ -74,16 +94,67 @@ class LruAlgorithm(Algorithm):
         # Remove from `nodes`
         del self.nodes[key]
 
-    def create(self, key):
+    def release_items(self, count=None, keys=None):
+        if count is not None:
+            def iterator():
+                for x in xrange(count):
+                    # Pop next item from `queue`
+                    key = self.queue.popright()
+
+                    # Delete from `nodes`
+                    del self.nodes[key]
+
+                    # Yield item
+                    yield key, self.cache.pop(key)
+        elif keys is not None:
+            def iterator():
+                for key in keys:
+                    # Remove from `queue
+                    self.queue.remove(key)
+
+                    # Delete from `nodes`
+                    del self.nodes[key]
+
+                    # Yield item
+                    yield key, self.cache.pop(key)
+        else:
+            raise ValueError()
+
+        self.archive.set_items(iterator())
+        return True
+
+    def prime(self, keys=None, force=False):
+        if keys is not None:
+            # Filter keys to ensure we only load ones that don't exist
+            keys = [
+                key for key in keys
+                if key not in self.cache
+            ]
+
+        # Iterate over archive items
+        items = self.archive.get_items(keys)
+
+        buffer = {}
+        context = PrimeContext(self, buffer)
+
+        for key, value in items:
+            # Store `value` in cache
+            buffer[key] = value
+
+        return context
+
+    def create(self, key, compact=True):
         if key in self.nodes:
             # Move node to the front of `queue`
             self.touch(key)
-        else:
-            # Store node in `queue`
-            self.nodes[key] = self.queue.appendleft(key)
+            return
 
-        # Compact `cache`
-        self.compact()
+        # Store node in `queue`
+        self.nodes[key] = self.queue.appendleft(key)
+
+        # Compact `cache` (if enabled)
+        if compact and self.compact_mode == 'auto':
+            self.compact()
 
     def load(self, key):
         # Load `key` from `archive`

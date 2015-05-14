@@ -17,6 +17,16 @@ class Archive(MappingModule):
     def save(self):
         raise NotImplementedError
 
+    def get_items(self, keys=None):
+        if keys is None:
+            return self.iteritems()
+
+        return [(key, self[key]) for key in keys]
+
+    def set_items(self, items):
+        for key, value in items:
+            self[key] = value
+
     def __delitem__(self, key):
         raise NotImplementedError
 
