@@ -37,7 +37,7 @@ def test_set():
     data = fetch(cursor, 'select key, value from "%s"' % st.archive.table)
 
     for x in xrange(5):
-        assert data[x] == str(x)
+        assert str(data[x]) == str(x)
 
 
 def test_get():

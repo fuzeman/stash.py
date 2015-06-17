@@ -87,6 +87,9 @@ def test_archive():
     for x in xrange(21, 26):
         st[x] = str(x)
 
+    # Force a compact to ensure items are archived
+    st.compact(force=True)
+
     assert sorted(st.archive) == [6, 7, 8, 9, 10]
     assert sorted(st.cache) == [1, 2, 3, 4, 5, 21, 22, 23, 24, 25]
 
