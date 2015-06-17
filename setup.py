@@ -14,7 +14,9 @@ setup(
     description='Dictionary-style storage interface with a modular interface for algorithms, archives, caches and serializers',
     packages=find_packages(exclude=[
         'examples',
-        'tests'
+
+        'tests',
+        'tests.*'
     ]),
     platforms='any',
 
