@@ -3,6 +3,10 @@ from stash.archives.core.base import Archive
 from contextlib import closing
 import apsw
 import collections
+import sys
+
+if sys.version_info > (3,):
+    buffer = memoryview
 
 
 class ApswArchive(Archive):
