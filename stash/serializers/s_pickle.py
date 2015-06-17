@@ -8,10 +8,7 @@ try:
 except ImportError:
     import pickle
 
-try:
-    from stash.lib.six.moves import cStringIO as StringIO
-except ImportError:
-    from stash.lib.six import StringIO
+from stash.lib.six import BytesIO
 
 
 class PickleSerializer(Serializer):
@@ -34,10 +31,13 @@ class PickleSerializer(Serializer):
 
     def loads(self, value):
         # Convert `buffer` -> UTF-8 string
-        value = str(value).decode('utf-8')
+        if six.PY3:
+            value = value.decode('utf-8')
+        else:
+            value = str(value).decode('utf-8')
 
-        # Build `StringIO` object from raw unicode string
-        value = StringIO(value.encode('raw_unicode_escape'))
+        # Build `BytesIO` object from raw unicode string
+        value = BytesIO(value.encode('raw_unicode_escape'))
 
         # Return decoded object
         return pickle.load(value)
