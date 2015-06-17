@@ -3,10 +3,10 @@ from stash import __version__
 from setuptools import setup, find_packages
 
 setup(
-    name='stash',
+    name='stash.py',
     version=__version__,
     license='MIT',
-    url='https://github.com/fuzeman/stash',
+    url='https://github.com/fuzeman/stash.py',
 
     author='Dean Gardiner',
     author_email='me@dgardiner.net',
