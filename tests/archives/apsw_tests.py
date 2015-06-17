@@ -1,5 +1,6 @@
 from stash import Stash, ApswArchive
 from stash.lib.six.moves import xrange
+from stash.lib import six
 
 import pytest
 
@@ -38,6 +39,43 @@ def test_set():
 
     for x in xrange(5):
         assert str(data[x]) == str(x)
+
+
+def test_set_unicode():
+    st = Stash('apsw:///:memory:?table=stash', 'lru:///?capacity=10')
+    values = [six.u('\xae'), six.u('\xaf'), six.u('\xb0')]
+
+    for x in xrange(len(values)):
+        st[x] = values[x]
+
+    st.save()
+
+    # Ensure DB contains correct data
+    cursor = st.archive.db.cursor()
+    data = fetch(cursor, 'select key, value from "%s"' % st.archive.table)
+
+    for x in xrange(len(values)):
+        if six.PY3:
+            assert ord(six.text_type(data[x])) == ord(values[x])
+        else:
+            assert ord(str(data[x]).decode('unicode_internal')) == ord(values[x])
+
+
+def test_set_utf8():
+    st = Stash('apsw:///:memory:?table=stash', 'lru:///?capacity=10')
+    values = ['\xc2\xae', '\xc2\xaf', '\xc2\xb0']
+
+    for x in xrange(len(values)):
+        st[x] = values[x]
+
+    st.save()
+
+    # Ensure DB contains correct data
+    cursor = st.archive.db.cursor()
+    data = fetch(cursor, 'select key, value from "%s"' % st.archive.table)
+
+    for x in xrange(len(values)):
+        assert str(data[x]) == values[x]
 
 
 def test_get():
