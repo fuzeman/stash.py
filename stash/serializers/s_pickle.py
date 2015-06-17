@@ -7,9 +7,9 @@ except ImportError:
     import pickle
 
 try:
-    from cStringIO import StringIO
+    from stash.lib.six.moves import cStringIO as StringIO
 except ImportError:
-    from StringIO import StringIO
+    from stash.lib.six import StringIO
 
 
 class PickleSerializer(Serializer):
