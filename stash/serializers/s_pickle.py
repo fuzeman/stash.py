@@ -1,6 +1,8 @@
 from stash.core.helpers import to_integer
 from stash.serializers.core.base import Serializer
 
+import stash.lib.six as six
+
 try:
     import cPickle as pickle
 except ImportError:
@@ -25,7 +27,7 @@ class PickleSerializer(Serializer):
         value = pickle.dumps(value, protocol=self.protocol)
 
         # Build unicode string from `value`
-        value = unicode(value, 'raw_unicode_escape')
+        value = six.text_type(value, 'raw_unicode_escape')
 
         # Return UTF-8 string
         return value.encode('utf-8')
