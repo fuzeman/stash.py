@@ -24,7 +24,7 @@ class PickleSerializer(Serializer):
         value = pickle.dumps(value, protocol=self.protocol)
 
         # Build unicode string from `value`
-        value = six.text_type(value, 'raw_unicode_escape')
+        value = six.text_type(value, 'latin-1')
 
         # Return UTF-8 string
         return value.encode('utf-8')
@@ -37,7 +37,7 @@ class PickleSerializer(Serializer):
             value = str(value).decode('utf-8')
 
         # Build `BytesIO` object from raw unicode string
-        value = BytesIO(value.encode('raw_unicode_escape'))
+        value = BytesIO(value.encode('latin-1'))
 
         # Return decoded object
         return pickle.load(value)
