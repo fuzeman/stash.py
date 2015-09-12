@@ -1,2 +1,5 @@
-*.pyc
 /examples/*.db
+/dist
+/stash.py.egg-info
+
+*.pyc
