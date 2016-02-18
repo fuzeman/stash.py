@@ -31,8 +31,10 @@ class Stash(MutableMapping):
             return False
 
         try:
-            # Update `archive` with the items in `cache`
-            self.archive.update(self.cache)
+            # Take exclusive access of cache
+            with self.cache.exclusive:
+                # Update `archive` with the items in `cache`
+                self.archive.update(self.cache.iteritems(__force=True))
 
             # Flush complete
             return True
