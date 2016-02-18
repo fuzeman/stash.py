@@ -22,9 +22,9 @@ class TestConcurrency:
         self.active = Semaphore()
 
         tasks = {
-            'get': 10,
-            'set': 10,
-            'flush': 5
+            'get': 20,
+            'set': 20,
+            'flush': 10
         }
 
         # Spawn threads
@@ -84,7 +84,7 @@ class TestConcurrency:
             if not self.running:
                 break
 
-            self.st.flush()
+            self.st.flush(force=True)
 
     def start_one(self, mode, id):
         self.active.acquire()
