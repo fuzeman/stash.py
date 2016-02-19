@@ -18,6 +18,7 @@ class TestConcurrency:
     # Tests
     #
 
+    @pytest.mark.slow
     def test_short(self):
         self.run({
             'get':   (10, 500),
