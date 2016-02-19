@@ -24,15 +24,12 @@ class LruAlgorithm(Algorithm):
     def __init__(self, capacity=100, compact='auto', compact_threshold=200):
         super(LruAlgorithm, self).__init__()
 
-        if dllist is None:
-            raise Exception('Unable to construct lru:// - "llist" and "pyllist" modules are not available')
-
         self.capacity = to_integer(capacity, 100)
 
         self.compact_mode = compact
         self.compact_threshold = to_integer(compact_threshold, 200)
 
-        self.queue = dllist()
+        self.queue = LruList()
         self.nodes = {}
 
         self._buffers = {}
@@ -100,13 +97,10 @@ class LruAlgorithm(Algorithm):
             keys = [keys]
 
         for key in keys:
-            try:
-                node = self.nodes.pop(key)
+            node = self.nodes.pop(key)
 
-                # Remove `node` from `queue`
-                self.queue.remove(node)
-            except KeyError:
-                pass
+            # Remove `node` from `queue`
+            self.queue.remove(node)
 
         # Remove keys from `cache` and `archive`
         return super(LruAlgorithm, self).delete(keys)
@@ -126,16 +120,13 @@ class LruAlgorithm(Algorithm):
 
     def _release(self, key=None):
         if key is None:
-            key = self.queue.popright()
+            key = self.queue.pop_right()
 
         # Move item to archive
         self.archive[key] = self.cache.pop(key)
 
-        try:
-            # Remove from `nodes`
-            del self.nodes[key]
-        except KeyError:
-            pass
+        # Remove from `nodes`
+        del self.nodes[key]
 
     def release_items(self, count=None, keys=None, force=False):
         if force:
@@ -161,7 +152,7 @@ class LruAlgorithm(Algorithm):
 
                 for x in xrange(count):
                     # Pop next item from `queue`
-                    key = self.queue.popright()
+                    key = self.queue.pop_right()
 
                     try:
                         # Delete from `nodes`
@@ -170,7 +161,8 @@ class LruAlgorithm(Algorithm):
                         # Yield item
                         yield key, self.cache.pop(key)
                     except KeyError:
-                        continue
+                        # Item already released from cache
+                        pass
 
             return iterator
 
@@ -187,7 +179,8 @@ class LruAlgorithm(Algorithm):
                         # Yield item
                         yield key, self.cache.pop(key)
                     except KeyError:
-                        continue
+                        # Item already released from cache
+                        pass
 
             return iterator
 
@@ -219,7 +212,7 @@ class LruAlgorithm(Algorithm):
             self.touch(key)
         except KeyError:
             # Store node in `queue`
-            self.nodes[key] = self.queue.appendleft(key)
+            self.nodes[key] = self.queue.append_left(key)
 
             # Compact `cache` (if enabled)
             if compact and self.compact_mode == 'auto':
@@ -234,12 +227,49 @@ class LruAlgorithm(Algorithm):
     def touch(self, key):
         node = self.nodes[key]
 
-        try:
-            # Remove `node` from `queue`
-            self.queue.remove(node)
-        except ValueError:
-            # Node doesn't exist in queue
-            pass
+        # Remove `node` from `queue`
+        self.queue.remove(node)
 
         # Append `node` to the start of `queue`
-        self.nodes[key] = self.queue.appendleft(node)
+        self.nodes[key] = self.queue.append_left(node)
+
+
+class LruList(object):
+    def __init__(self):
+        if dllist is None:
+            raise Exception('Unable to construct lru:// - "llist" and "pyllist" modules are not available')
+
+        self._list = dllist()
+        self._lock = Lock()
+
+    def append(self, value):
+        return self.append_right(value)
+
+    def append_left(self, value):
+        with self._lock:
+            return self._list.appendleft(value)
+
+    def append_right(self, value):
+        with self._lock:
+            return self._list.appendright(value)
+
+    def pop(self):
+        return self.pop_right()
+
+    def pop_left(self):
+        with self._lock:
+            return self._list.popleft()
+
+    def pop_right(self):
+        with self._lock:
+            return self._list.popright()
+
+    def remove(self, node):
+        with self._lock:
+            return self._list.remove(node)
+
+    def __iter__(self):
+        return self._list.__iter__()
+
+    def __len__(self):
+        return self._list.__len__()
