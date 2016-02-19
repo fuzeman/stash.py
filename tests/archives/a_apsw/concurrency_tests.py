@@ -2,6 +2,7 @@ from stash import Stash
 from stash.lib.six.moves import xrange
 
 from threading import Semaphore, Thread
+import pytest
 import random
 import sys
 
@@ -11,21 +12,37 @@ class TestConcurrency:
         self.st = Stash('apsw:///:memory:?table=stash', 'lru:///?capacity=10')
 
     def teardown_method(self, *args):
-        # TODO self.st.close()
         self.st = None
 
-    def test_threading(self):
+    #
+    # Tests
+    #
+
+    def test_short(self):
+        self.run({
+            'get':   (10, 500),
+            'set':   (10, 500),
+            'flush': ( 5, 250)
+        })
+
+    @pytest.mark.slow
+    def test_long(self):
+        self.run({
+            'get':   (20, 1000),
+            'set':   (20, 1000),
+            'flush': (10,  500)
+        })
+
+    #
+    # Tasks
+    #
+
+    def run(self, tasks):
         # Setup test
         self.exc_info = None
         self.running = True
 
         self.active = Semaphore()
-
-        tasks = {
-            'get': 20,
-            'set': 20,
-            'flush': 10
-        }
 
         # Spawn threads
         self.start(tasks)
@@ -37,26 +54,57 @@ class TestConcurrency:
         if self.exc_info:
             raise self.exc_info[0], self.exc_info[1], self.exc_info[2]
 
-    def run(self, mode, id):
+    def start(self, tasks):
+        count = sum([
+            threads
+            for (threads, _) in tasks.values()
+        ])
+
+        self.active._Semaphore__value = count
+
+        # Start threads
+        for mode in ['get', 'set', 'flush']:
+            self.start_task(mode, *(tasks.get(mode) or (0, 0)))
+
+    def start_task(self, mode, threads, samples):
+        for x in xrange(threads):
+            self.start_one(mode, x, samples)
+
+    def start_one(self, mode, id, samples):
+        self.active.acquire()
+
+        thread = Thread(name='%s:%s' % (mode, id), target=self.child_run, args=(mode, samples))
+        thread.start()
+
+    def wait(self, tasks):
+        count = sum([
+            threads
+            for (threads, _) in tasks.values()
+        ])
+        remaining = count
+
+        for x in xrange(count):
+            self.active.acquire()
+            remaining -= 1
+
+    def child_run(self, mode, samples):
         try:
             # Run operations
-            if mode == 'get':
-                self.run_get(mode, id)
+            func = getattr(self, 'child_%s' % mode, None)
 
-            if mode == 'set':
-                self.run_set(mode, id)
+            if func is None:
+                raise ValueError('Unknown mode: %r' % mode)
 
-            if mode == 'flush':
-                self.run_flush(mode, id)
+            func(samples)
         except Exception:
             self.exc_info = sys.exc_info()
             self.running = False
         finally:
             self.active.release()
 
-    def run_get(self, mode, id):
+    def child_get(self, samples):
         # Build list of random numbers
-        nums = list(xrange(1000))
+        nums = list(xrange(samples))
         random.shuffle(nums)
 
         # Run operations
@@ -66,9 +114,9 @@ class TestConcurrency:
 
             self.st.get(x)
 
-    def run_set(self, mode, id):
+    def child_set(self, samples):
         # Build list of random numbers
-        nums = list(xrange(1000))
+        nums = list(xrange(samples))
         random.shuffle(nums)
 
         # Run operations
@@ -78,45 +126,10 @@ class TestConcurrency:
 
             self.st[x] = str(x)
 
-    def run_flush(self, mode, id):
+    def child_flush(self, samples):
         # Run operations
-        for x in xrange(500):
+        for x in xrange(samples):
             if not self.running:
                 break
 
             self.st.flush(force=True)
-
-    def start_one(self, mode, id):
-        self.active.acquire()
-
-        thread = Thread(name='%s:%s' % (mode, id), target=self.run, args=(mode, id))
-        thread.start()
-
-    def start(self, tasks):
-        count = sum(tasks.values())
-
-        self.active._Semaphore__value = count
-
-        # Start threads
-        for x in xrange(tasks.get('get', 0)):
-            self.start_one('get', x)
-
-        for x in xrange(tasks.get('set', 0)):
-            self.start_one('set', x)
-
-        for x in xrange(tasks.get('flush', 0)):
-            self.start_one('flush', x)
-
-    def wait(self, tasks):
-        count = sum(tasks.values())
-        remaining = count
-
-        for x in xrange(count):
-            self.active.acquire()
-            remaining -= 1
-
-if __name__ == '__main__':
-    cls = TestConcurrency()
-
-    cls.setup_method()
-    cls.test_threading()
