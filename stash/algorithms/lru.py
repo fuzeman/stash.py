@@ -227,8 +227,12 @@ class LruAlgorithm(Algorithm):
     def touch(self, key):
         node = self.nodes[key]
 
-        # Remove `node` from `queue`
-        self.queue.remove(node)
+        try:
+            # Remove `node` from `queue`
+            self.queue.remove(node)
+        except ValueError:
+            # Unable to find `node` in `queue`
+            pass
 
         # Append `node` to the start of `queue`
         self.nodes[key] = self.queue.append_left(node)
