@@ -1,5 +1,6 @@
 from stash.caches.core.base import Cache
 from stash.core.exclusive import operation
+from stash.lib.six import PY3
 
 
 class MemoryCache(Cache):
@@ -12,6 +13,9 @@ class MemoryCache(Cache):
 
     @operation()
     def iteritems(self):
+        if PY3:
+            return self.data.items()
+
         return self.data.iteritems()
 
     @operation()

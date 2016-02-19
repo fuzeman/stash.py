@@ -1,4 +1,5 @@
 from stash import Stash
+from stash.lib import six
 from stash.lib.six.moves import xrange
 
 from threading import Semaphore, Thread
@@ -53,7 +54,7 @@ class TestConcurrency:
 
         # Raise any exception captured in threads
         if self.exc_info:
-            raise self.exc_info[0], self.exc_info[1], self.exc_info[2]
+            six.reraise(*self.exc_info)
 
     def start(self, tasks):
         count = sum([
